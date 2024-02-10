@@ -1,6 +1,10 @@
 import { useRef, useState } from "react";
 import { API_KEY } from "../../apiKey";
 import { Line } from "react-chartjs-2";
+import InputBox from "./InputBox.jsx";
+import ButtonComponent from "./ButtonComponent.jsx";
+import Loading from "./Loading.jsx";
+import RecentSearches from "./RecentSearches.jsx";
 
 const Api_key = API_KEY;
 
@@ -10,23 +14,8 @@ const App = () => {
   const [apiData, setApiData] = useState(null);
   const [showWeather, setShowWeather] = useState(null);
   const [recentSearches, setRecentSearches] = useState([]);
-  const [pastWeatherData, setPastWeatherData] = useState([]);
 
   const [loading, setLoading] = useState(false);
-  const addToPastWeatherData = (newData) => {
-    console.log(newData);
-    setPastWeatherData((prevData) => {
-      const newDataPoints = [
-        {
-          label: `${newData.name}, ${newData.sys.country}`,
-          temperature: newData.main.temp,
-          weatherType: newData.weather[0].main,
-        },
-        ...prevData.slice(0, 9),
-      ]; // Keep the last 10 data points
-      return [...new Set(newDataPoints)];
-    });
-  };
 
   const addToRecentSearches = (newCity) => {
     setRecentSearches((prevSearches) => {
@@ -47,15 +36,12 @@ const App = () => {
           setShowWeather([
             {
               type: "Not Found",
-              img: "https://cdn-icons-png.flaticon.com/512/4275/4275497.png",
             },
           ]);
         }
         setShowWeather(data.weather[0].main);
-        console.log(data);
         setApiData(data);
         addToRecentSearches(city);
-        addToPastWeatherData(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -68,36 +54,15 @@ const App = () => {
     <div className="h-screen grid place-items-center">
       <div className="bg-white w-96 p-4 rounded-md">
         <div className="flex items-center justify-between">
-          <input
-            type="text"
-            ref={inputRef}
-            placeholder="Enter Your Location"
-            className="text-xl border-b
-          p-1 border-gray-200 font-semibold uppercase flex-1"
-          />
-          <select id="unit-switch" ref={unitRef} className="border p-2">
-            <option value="metric">Celsius</option>
-            <option value="imperial">Fahrenheit</option>
-          </select>
-          <button
-            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-            onClick={fetchWeather}
-          >
-            Search
-          </button>
+          <InputBox inputRef={inputRef} unitRef={unitRef} />
+          <ButtonComponent onClick={fetchWeather} value={"search"} />
         </div>
         <div
           className={`duration-300 delay-75  overflow-hidden
          ${showWeather ? "h-[27rem]" : "h-0"}`}
         >
           {loading ? (
-            <div className="grid place-items-center h-full">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/1477/1477009.png"
-                alt="..."
-                className="w-14 mx-auto mb-2 animate-spin"
-              />
-            </div>
+            <Loading />
           ) : (
             showWeather && (
               <div className="text-center flex flex-col gap-6 mt-10">
@@ -126,28 +91,7 @@ const App = () => {
                         </h5>
                       </div>
                     </div>
-                    <div>
-                      <h2 className="text-xl font-bold mb-2">
-                        Recent Searches
-                      </h2>
-                      <ul>
-                        {recentSearches.map((search, index) => (
-                          <li key={index} className="cursor-pointer">
-                            {search.toUpperCase()}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold mb-2">Chart </h2>
-                      <ul>
-                        {pastWeatherData.map((data, index) => (
-                          <li key={index} className="cursor-pointer">
-                            {`${data.label}: ${data.weatherType}, Temperature: ${data.temperature}°`}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <RecentSearches recentSearches={recentSearches} />
                   </>
                 )}
               </div>
