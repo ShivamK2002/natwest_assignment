@@ -1,6 +1,6 @@
 export default function InputBox({ inputRef, unitRef }) {
   return (
-    <>
+    <div>
       <input
         type="text"
         ref={inputRef}
@@ -12,6 +12,6 @@ p-1 border-gray-200 font-semibold uppercase flex-1"
         <option value="metric">Celsius</option>
         <option value="imperial">Fahrenheit</option>
       </select>
-    </>
+    </div>
   );
 }
